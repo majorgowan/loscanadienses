@@ -1,3 +1,4 @@
+
 def loadDataSet():
     return [['apple','pear','tomato'], \
             ['grape','pear','cucumber'], \
