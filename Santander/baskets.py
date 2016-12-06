@@ -33,9 +33,10 @@ def customerData(df, id, idfield = 'ncodpers', withNcodpers=True):
     return makeBaskets(df[df[idfield]==id],withNcodpers=withNcodpers)
 
 def onlyMonth(df, dateString, customers):
+    month_df = df[df['fecha_dato']==dateString]
     baskets = []
     for customer in customers:
         baskets.append((customer, \
-                       makeBaskets(df[(df['ncodpers']==customer) & (df['fecha_dato']==dateString)], \
+                       makeBaskets(month_df[month_df['ncodpers']==customer], \
                                    withNcodpers=False)))
     return baskets
