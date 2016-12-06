@@ -26,6 +26,18 @@ def applyRules(rules, basket):
                     suggestions.append((item,confs[i]))
     return suggestions
 
+def allSuggestions(rules, customerBaskets):
+    allsug = []
+    for cb in customerBaskets:
+        cust_id = cb[0]
+        basket = cb[1]
+        if (len(basket) > 0):
+            print basket[0], len(basket[0])
+            allsug.append((cust_id,applyRules(rules,basket[0])))
+        else:
+            allsug.append((cust_id,[]))
+    return allsug
+
 def customers(df, idfield = 'ncodpers'):
     return sorted(list(set(df[idfield])))
 
@@ -39,4 +51,5 @@ def onlyMonth(df, dateString, customers):
         baskets.append((customer, \
                        makeBaskets(month_df[month_df['ncodpers']==customer], \
                                    withNcodpers=False)))
+        # print 'customer ' + str(customer)
     return baskets
