@@ -1,4 +1,6 @@
-def makeBaskets(df, rows = (0,10000), cols = (24,48), withNcodpers=True):
+def makeBaskets(df, rows = None, cols = (24,48), withNcodpers=True):
+    if rows is None:
+        rows = (0,len(df))
     baskets_df = df.iloc[rows[0]:rows[1],cols[0]:cols[1]]
     baskets_zeros = baskets_df.values.tolist()
     cols = list(baskets_df.columns)
@@ -30,10 +32,9 @@ def allSuggestions(rules, customerBaskets):
     allsug = []
     for cb in customerBaskets:
         cust_id = cb[0]
-        basket = cb[1]
+        basket = cb[2]
         if (len(basket) > 0):
-            print basket[0], len(basket[0])
-            allsug.append((cust_id,applyRules(rules,basket[0])))
+            allsug.append((cust_id,applyRules(rules,basket)))
         else:
             allsug.append((cust_id,[]))
     return allsug
@@ -44,12 +45,3 @@ def customers(df, idfield = 'ncodpers'):
 def customerData(df, id, idfield = 'ncodpers', withNcodpers=True):
     return makeBaskets(df[df[idfield]==id],withNcodpers=withNcodpers)
 
-def onlyMonth(df, dateString, customers):
-    month_df = df[df['fecha_dato']==dateString]
-    baskets = []
-    for customer in customers:
-        baskets.append((customer, \
-                       makeBaskets(month_df[month_df['ncodpers']==customer], \
-                                   withNcodpers=False)))
-        # print 'customer ' + str(customer)
-    return baskets
