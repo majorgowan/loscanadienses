@@ -92,6 +92,23 @@ def evaluateBasket(pred_basket, ref_basket):
             total_prec += ncorrect/(i+1.0)
     return total_prec / min(7,len(ref_basket))
 
+def wayOfAllFlesh(curr_baskets, pred_baskets, popularity, cutoff=7):
+    # given lists of current and predicted baskets in form of (cust_id, basket) pairs 
+    # and a list of most popular products (product, frequency)
+    # fill in values up to cutoff with most popular products not already in basket or suggestions
+    products = [a[0] for a in popularity]
+    filled_baskets = []
+    curr_dict = dict([(a[0],a[-1]) for a in curr_baskets])
+    for basket in pred_baskets:
+        if basket[0] in curr_dict:
+            bask = basket[1] + \
+                    [prod for prod in products \
+                        if prod not in (curr_dict[basket[0]] + basket[1])]
+        else:
+            bask = basket[1] + [prod for prod in products if prod not in basket[1]]
+        filled_baskets.append((basket[0],bask[:cutoff]))
+    return filled_baskets        
+
 def evaluateAll(pred_baskets, curr_baskets, actual_baskets):
     additions = allAdditions(curr_baskets, actual_baskets)
     additions_dict = dict([(a[0],a[-1]) for a in additions])

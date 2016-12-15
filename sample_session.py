@@ -23,6 +23,15 @@ import Santander.baskets as sbaskets
 # load Santander training data as pandas dataframe
 sant_df = pd.read_csv('Data/train_ver2.csv')
 
+### Identify most popular products
+# product names
+prod_names = sant_df.columns[24:48]
+sums = []
+for prod in prod_names:
+    sums.append(sant_df[prod].sum())
+sums = [int(s) for s in sums]
+popularity = sorted(zip(prod_names,sums),key=lambda a: -a[1])
+
 ### Train association rules
 # randomly sample batches of rows, generate association rules,
 # and average the generated rules by grouping by (left-hand-side,right-hand-side) pair
@@ -76,9 +85,12 @@ actual_baskets = sorted(sbaskets.makeBaskets(actual))
 # apply rules to each basket
 pred_baskets = sorted(sbaskets.allSuggestions(rules_average, curr_baskets, withConfs=False))
 
+### Fill prediction baskets with remaining products in descending order of popularity
+filled_baskets = sbaskets.wayOfAllFlesh(curr_baskets, pred_baskets, popularity)
+
 ### compare predictions to actual additions
 # scores
-scores = sbaskets.evaluateAll(pred_baskets, curr_baskets, actual_baskets)
+scores = sbaskets.evaluateAll(filled_baskets, curr_baskets, actual_baskets)
 # find entries with positive score
 got_one = [s for s in scores if s[-1]>0]
 rows_with_additions = sum(len(a[1])>0 for a in scores)
@@ -96,20 +108,19 @@ curr_date = '2016-05-28'
 curr_baskets = sorted(sbaskets.makeBaskets(curr))
 # apply rules to each basket
 pred_baskets = sorted(sbaskets.allSuggestions(rules_average, curr_baskets, withConfs=False))
-# empty baskets for test set customers
+# list of customers in test set
 customers = sbaskets.customers(sant_test_df)
-# convert prediction basket list to a dictionary (for faster accessing)
+# trim pred_baskets of customers not in test_set and add empty baskets of new customers
 pred_dict = dict([(b[0],b[-1]) for b in pred_baskets])
-predictions = []
-for customer in customers:
-    # for customers not in pred_baskets, add prediction of current account
-    if customer not in pred_dict:
-        predictions.append((customer,['ind_cco_fin_ult1']))
-    else:
-        predictions.append((customer,pred_dict[customer]))
-predictions.sort()
+test_dict = dict([(c,[]) for c in customers])
+pred_baskets = sorted([(cust_id,[]) for cust_id in test_dict if cust_id not in pred_dict]
+                     + [(cust_id,pred_dict[cust_id]) for cust_id in pred_dict if cust_id in test_dict])
+# fill prediction baskets with remaining products in descending order of popularity
+filled_baskets = sbaskets.wayOfAllFlesh(curr_baskets, pred_baskets, popularity)
+filled_baskets.sort()
+
 # create submission file
-sbaskets.makeSubmissionCSV(predictions,filename='loscanadienses_submission_file.csv')
+sbaskets.makeSubmissionCSV(filled_baskets,filename='loscanadienses_submission_file.csv')
 
 #################### TO DO
 #- tune hyperparameters (min_supp, min_conf, threshhold_conf)
