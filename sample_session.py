@@ -119,6 +119,17 @@ pred_baskets = sorted([(cust_id,[]) for cust_id in test_dict if cust_id not in p
 filled_baskets = sbaskets.wayOfAllFlesh(curr_baskets, pred_baskets, popularity)
 filled_baskets.sort()
 
+### Baseline model: no association rules, just most popular remaining products
+### suggested to all customers
+# list of customers in test set
+customers = sbaskets.customers(sant_test_df)
+# empty prediction baskets
+pred_baskets = [(cust_id,[]) for cust_id in customers]
+# fill prediction baskets with products in descending order of popularity
+baseline_baskets = sbaskets.wayOfAllFlesh(curr_baskets, pred_baskets, popularity)
+baseline_baskets.sort()
+
+
 # create submission file
 sbaskets.makeSubmissionCSV(filled_baskets,filename='loscanadienses_submission_file.csv')
 
