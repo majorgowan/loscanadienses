@@ -32,7 +32,7 @@ def allSuggestions(rules, customerBaskets):
         cust_id = cb[0]
         basket = cb[1]
         if (len(basket) > 0):
-            print basket[0], len(basket[0])
+            # print basket[0], len(basket[0])
             allsug.append((cust_id,applyRules(rules,basket[0])))
         else:
             allsug.append((cust_id,[]))
