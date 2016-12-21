@@ -1,0 +1,25 @@
+c <- train[1:1000,]
+trainsample <- select(c,ncodpers,25:48)
+
+library(dplyr)
+
+d <- trainsample %>%
+	group_by(ncodpers)  %>%
+	gather(key=products,value=taken,-ncodpers) %>%
+	filter(taken == 1) %>%
+	select(-taken)
+
+write.csv(d, file = "newfile.csv")
+
+trans = read.transactions("newfile.csv", format = "single", sep = ",", cols = c("ncodpers", "products"))
+inspect(trans)
+
+library(arules)
+library(arulesViz)
+library(datasets)
+
+itemFrequencyPlot(d$products,topN=5,type="absolute")
+
+rules <- apriori(trans, parameter = list(supp = 0.001, conf = 0.8))
+options(digits=2)
+inspect(rules[1:20])
